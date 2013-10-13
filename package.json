@@ -1,0 +1,28 @@
+{
+  "name"          : "elasticbone",
+  "description"   : "Connect Backbone to Elasticsearch",
+  "url"           : "https://github.com/grahamjenson/elasticbone.git",
+  "keywords"      : ["model", "elasticsearch", "backbone"],
+  "author"        : "Graham Jenson <grahamjenson@maori.geek.nz>",
+  "dependencies"  : {
+    "jquery": "",
+    "backbone": ""
+  },
+  "devDependencies": {
+    "mocha": "1.13.0",
+    "chai": "1.8.1",
+    "sinon": "1.7.3",
+    "coffee-script": "1.6.1"
+  },
+  "scripts": {
+    "build": "coffee -c elasticbone.coffee",
+    "test": "mocha --compilers coffee:coffee-script -C",
+  },
+  "main"          : "elasticbone.js",
+  "version"       : "1.1.0",
+  "license"       : "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grahamjenson/elasticbone.git"
+  }
+}
