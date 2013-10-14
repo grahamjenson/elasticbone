@@ -50,6 +50,11 @@ describe 'has relationship function,', ->
 
     it 'should create model including all parse relationships'
 
+    it 'should create a model without a parse relationship', ->
+      to = new TestObject( {name: 'test'} , {parse: true} )
+      to.get('bo')
+      to.get('name').should.equal 'test'
+
     it 'should save model including all parse relationship', ->
       sinon.stub($, 'ajax', (req) -> req.success({ok: true, _id : 'new_id'}, {}, {}));
       to = new TestObject({name: 'test', bo: {name: 'bo_test'}},{parse: true})
