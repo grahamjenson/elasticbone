@@ -31,17 +31,17 @@ class Posts extends Elasticbone.ElasticCollection
 Elasticmodels and elasticcollections reference an elasticsearch server, index and type.
 
 ```
-class User extends Neckbone.ElasticModel
+class User extends Elasticbone.ElasticModel
   server: 'localhost:9000' 
   index: 'blog'
   type: 'user'
 
-class Post extends Neckbone.ElasticModel
+class Post extends Elasticbone.ElasticModel
   server: 'localhost:9000' 
   index: 'blog'
   type: 'post'
 
-class Posts extends Neckbone.ElasticCollection
+class Posts extends Elasticbone.ElasticCollection
   server: 'localhost:9000' 
   index: 'blog'
   type: 'post'
@@ -70,7 +70,7 @@ class Tag extends Backbone.Model
 
 class Tags extends Backbone.Collection
 
-class Post extends Neckbone.ElasticModel
+class Post extends Elasticbone.ElasticModel
   ...
   @has 'tags', Tags
 ```
@@ -80,10 +80,10 @@ NOTE: Tag is not an ElasticModel as it is not a document in Elasticsearch.
 ###has seperate ElasticModel relationship
 
 ```
-class Posts extends Neckbone.ElasticCollection
+class Posts extends Elasticbone.ElasticCollection
   fetch_query: -> {"query":{"field": {"author":"\"#{this.get('user').name}\""}}}
     
-class User extends Neckbone.ElasticModel
+class User extends Elasticbone.ElasticModel
   ...
   @has 'posts', Posts, method: 'fetch'
 
@@ -103,19 +103,19 @@ A problem occurs when a model wants to have reverse relations, e.g. a user has p
 As javascript will execute in order THIS CODE WILL NOT WORK, because when User references posts it will not exist yet.
 
 ```
-class User extends Neckbone.ElasticModel
+class User extends Elasticbone.ElasticModel
   @has 'posts', Posts
 
-class Posts extends Neckbone.ElasticCollection
+class Posts extends Elasticbone.ElasticCollection
   @has 'author', User 
 ```
 
 Instead you can use ```has``` after the classes declaration
 
 ```
-class User extends Neckbone.ElasticModel
+class User extends Elasticbone.ElasticModel
 
-class Posts extends Neckbone.ElasticCollection
+class Posts extends Elasticbone.ElasticCollection
   @has 'author', User
 
 User.has 'posts', Posts
