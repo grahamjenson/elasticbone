@@ -68,7 +68,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
 
   #(elasticsearch document) -> (Backbone model)
   parse: (data, options) ->
-    data = super
+    data = super(data, options)
 
     #The returned object
     parsed = {}
@@ -77,7 +77,6 @@ class Elasticbone.ElasticModel extends Backbone.Model
       parsed.id = data._id
     if data.id
       parsed.id = id
-
     #Possible Data
     # 1) on a save to elasticsearch the responce will work
     #model is created without ids but needs to be parsed
@@ -92,7 +91,8 @@ class Elasticbone.ElasticModel extends Backbone.Model
       parsed = _.extend(parsed, data)
 
     for val in @get_relationships(method: 'parse')
-        parsed[val.name] = new val.model(parsed[val.name], parse: true)
+        if parsed[val.name]
+          parsed[val.name] = new val.model(parsed[val.name], parse: true)
 
     parsed
 

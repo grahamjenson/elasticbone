@@ -1,9 +1,10 @@
 chai = require 'chai'  
-chai.should()
+should = chai.should()
+expect = chai.expect
 
 sinon = require 'sinon'
 
-Elasticbone = require('../elasticbone')
+Elasticbone = require('../elasticbone.coffee')
 Backbone = Elasticbone.Backbone
 $ = Elasticbone.$
 _ = Elasticbone._
@@ -48,11 +49,9 @@ describe 'has relationship function,', ->
       to = new TestObject( to_json , {parse: true} )
       to.toJSON().should.eql to_json
 
-    it 'should create model including all parse relationships'
-
     it 'should create a model without a parse relationship', ->
       to = new TestObject( {name: 'test'} , {parse: true} )
-      to.get('bo')
+      expect(to.get('bo')).to.be.undefined
       to.get('name').should.equal 'test'
 
     it 'should save model including all parse relationship', ->
