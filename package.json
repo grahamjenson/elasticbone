@@ -5,8 +5,8 @@
   "keywords"      : ["model", "elasticsearch", "backbone"],
   "author"        : "Graham Jenson <grahamjenson@maori.geek.nz>",
   "dependencies"  : {
-    "jquery": "",
-    "backbone": ""
+    "jquery": "1.8.3",
+    "backbone": "1.0.0"
   },
   "devDependencies": {
     "mocha": "1.13.0",
@@ -15,11 +15,11 @@
     "coffee-script": "1.6.1"
   },
   "scripts": {
-    "build": "coffee -c elasticbone.coffee",
-    "test": "mocha --compilers coffee:coffee-script -C",
+    "build": "./node_modules/.bin/coffee -c elasticbone.coffee",
+    "test": "mocha --compilers coffee:coffee-script -C"
   },
   "main"          : "elasticbone.js",
-  "version"       : "1.1.0",
+  "version"       : "0.0.1",
   "license"       : "MIT",
   "repository": {
     "type": "git",
