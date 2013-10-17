@@ -47,6 +47,12 @@ class Elasticbone.ElasticModel extends Backbone.Model
   get_relationship_method: (attr) ->
     @get_relationship(attr).method
 
+  get_relationship_reverse: (attr) ->
+    @_has[attr].reverse
+
+  has_relationship_reverse: (attr) ->
+    !! @_has[attr].reverse
+
   get_relationships: (options ={}) ->
     if not @_has
       return []
@@ -62,13 +68,12 @@ class Elasticbone.ElasticModel extends Backbone.Model
     #if it is there return it as a promise
     if data 
       return $.when(data)
-
     if @has_relationship(attr, method: 'fetch')
-      rev = @_has[attr].reverse
-      m = new @_has[attr].model()
-      m.set_reverse(rev, @)
-      return m.fetch(options) #returns a J
-    null
+      m = new @get_relationship_model(attr)()
+      m.set(get_relationship_reverse(attr), @) if has_relationship_reverse(attr)
+      @set(attr, m)
+      return m.fetch(options)
+    $.when(null)
 
   #(elasticsearch document) -> (Backbone model)
   parse: (data, options) ->
@@ -108,44 +113,6 @@ class Elasticbone.ElasticModel extends Backbone.Model
       for key,val of @_has
         json[key] = @get(key).toJSON(options) if val.method == 'parse' 
     json
-
-  _generage_handler: (cb) ->
-    handler = {
-      success: (model, res, options) -> 
-        console.log 'successful', model; 
-        cb(null, model) 
-      error: (model, xhr, options) -> 
-        console.log 'error', model, xhr, options
-        cb(xhr,model)
-    }
-
-  _generate_get_handler: (cb,attr) =>
-    handler = {
-      success: (model, res, options) => 
-        console.log 'successful', model, @;
-        @set(attr, model)
-        rev = @_has[attr].reverse
-        if rev
-          #if model is a collection
-          if model.models
-            _.map(model.models, (m) => m.set(rev,@))
-          else 
-            model.set(rev, @)
-
-        cb(null, model) 
-      error: (model, xhr, options) -> 
-        console.log 'error', model, xhr, options
-        cb(xhr,model)
-    }
-
-  fn_save: => (cb) => @save({}, @_generage_handler(cb))
-
-  fn_fetch: => (cb) => @fetch(@_generage_handler(cb))
-  
-  fn_get: (attr) => (cb) => @get(attr, @_generate_get_handler(cb,attr))
-  
-  set_reverse: (attr,model) ->
-    @set(attr,model)
 
 class Elasticbone.ElasticCollection extends Backbone.Collection
   fetch_query: -> {"query":{"match_all": {}}}
