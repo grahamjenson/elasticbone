@@ -53,34 +53,33 @@ describe 'has relationship function,', ->
       to = new TestObject( to_json , {parse: true} )
       to.toJSON().should.eql to_json
 
-    it 'should create a model without a parse relationship', ->
+    it 'should create a model without a parse relationship', (done) ->
       to = new TestObject( {name: 'test'} , {parse: true} )
-      expect(to.get('bo').done()).to.be.undefined
-      to.get('name').done().should.equal 'test'
+      $.when(to.get('name'), to.get('bo')).done( (name, bo) ->
+        name.should.equal 'test'
+        expect(bo).to.be.undefined
+        done()
+      )
 
-    it 'should save model including all parse relationship', ->
-      sinon.stub($, 'ajax', (req) -> req.success({ok: true, _id : 'new_id'}, {}, {}));
-      to = new TestObject({name: 'test', bo: {name: 'bo_test'}},{parse: true})
-      to.get('bo').done().should.be.instanceOf BasicObject
-      to.save()
-      $.ajax.restore()
+    it 'should save model including all parse relationship', (done) ->
+      to_json = {name: 'test', bo: {name: 'bo_test'}}
+      sinon.stub($, 'ajax', (req) -> 
+        req.data.should.equal JSON.stringify(to_json)
+        req.success({ok: true, _id : 'new_id'}, {}, {})
+      )
+      
+      to = new TestObject(to_json,{parse: true})
+      $.when(to.save()).done( (bo) ->
+        to.id.should.equal 'new_id'
+        sinon.assert.calledOnce($.ajax);
+        $.ajax.restore()
+        done()
+      )
 
 
   describe 'with fetch relationship', ->
-    it 'should add the relationship', ->
-      to = new TestObject()
-      to.has_relationship('fbo').should.equal true
-      to.get_relationship('fbo').should.be.an 'object'
-      to.get_relationship_model('fbo').should.equal BasicObject
-      to.get_relationship_method('fbo').should.equal 'fetch'
-
-    it 'should initialize the object relationship', ->
-      to = new TestObject({name: 'test', fbo: {name: 'bo_test'}},{parse: true})
-      to.has_relationship('fbo').should.equal true
-      to.get_relationship('fbo').should.be.an 'object'
-      to.get_relationship_model('fbo').should.equal BasicObject
-      to.get_relationship_method('fbo').should.equal 'fetch'
-
+    it 'should add the relationship'
+    it 'should initialize the object relationship'
     it 'should not fetch on parse'
     it 'should fetch on get'
     it 'should parse the returned value'

@@ -1,7 +1,7 @@
 Elasticbone = {}
 
 $ = require 'jquery'
-_ = require('backbone/node_modules/underscore')
+_ = require 'backbone/node_modules/underscore'
 Backbone = require 'backbone'
 Backbone.$ = $
 
@@ -73,7 +73,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
       m.set(get_relationship_reverse(attr), @) if has_relationship_reverse(attr)
       @set(attr, m)
       return m.fetch(options)
-    $.when(null)
+    $.when(undefined)
 
   #(elasticsearch document) -> (Backbone model)
   parse: (data, options) ->
@@ -109,9 +109,9 @@ class Elasticbone.ElasticModel extends Backbone.Model
   toJSON: (options) ->
     json = super
     delete json.id
-    if @_has
-      for key,val of @_has
-        json[key] = @get(key).toJSON(options) if val.method == 'parse' 
+    deffereds = []
+    for rel in @get_relationships(method: 'parse')
+      deffereds.push @get(rel.name).done( (x) -> json[rel.name] = x.toJSON(options)) 
     json
 
 class Elasticbone.ElasticCollection extends Backbone.Collection
