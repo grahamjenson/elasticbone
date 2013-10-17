@@ -56,15 +56,19 @@ class Elasticbone.ElasticModel extends Backbone.Model
         rels.push(val)
     rels
 
+  #Semantic change, get reutrns a promise for the data
   get: (attr, options) ->
-    data = super(attr)
-    if not data and @has_relationship(attr, method: 'fetch')
+    data = super(attr,options)
+    #if it is there return it as a promise
+    if data 
+      return $.when(data)
+
+    if @has_relationship(attr, method: 'fetch')
       rev = @_has[attr].reverse
       m = new @_has[attr].model()
       m.set_reverse(rev, @)
-      m.fetch(options)
-      return m
-    data
+      return m.fetch(options) #returns a J
+    null
 
   #(elasticsearch document) -> (Backbone model)
   parse: (data, options) ->
