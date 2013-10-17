@@ -6,7 +6,7 @@ NOTE: This project is still in development, and not production ready. Though hop
 [Backbone](http://backbonejs.org/) is an awesome MVC framework, where the model are defined to interact with a rest api.
 Elasticbone is an extension making it easy for Backbone models to be connected to Elasticsearch documents.
 
-Elasticbone is usable in both a browser, or node.js server.
+Elasticbone is (should be) usable in both a browser, or node.js server.
 
 To install
 
@@ -88,13 +88,13 @@ class User extends Elasticbone.ElasticModel
   @has 'posts', Posts, method: 'fetch'
 
 user = new User(id: 1)
-user.fetch(success: ->
-  posts = user.get('posts')
-)
+$.when(user.fetch()).done( (user) -> user.get('posts'))
 ```
 
-When ```user.get('posts')``` the posts are fetched out of elasticsearch using the 
-```fetch_query``` which selects all posts where the field ```author``` is exactly the users name.
+Since fetching the ```posts``` is expencive Elasticbone will delay it until a ```get``` is called to retreive them.
+This uses jquery promises, so that you can register when a callback is fired.
+When ```user.get('posts')``` a promise is returned for the posts that are fetched out of elasticsearch using the 
+```fetch_query```. This query returns all posts where the field ```author``` is exactly the users name.
 
 
 ###Note: Circular has
