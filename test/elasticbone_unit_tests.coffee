@@ -13,13 +13,16 @@ es =
   server: 'http://localhost:9225'
   index: 'elastic_bone_tests'
 
+class BasicFetchObject extends Backbone.Model
+  fetch_query: 'QUERYs'
+
 class BasicObject extends Backbone.Model
 
 class TestObject extends Elasticbone.ElasticModel
   server: es.server
   index: es.index
   @has 'bo', BasicObject
-  @has 'fbo', BasicObject, method: 'fetch'
+  @has 'bfo', BasicFetchObject, method: 'fetch'
 
 describe 'Initialization of ElasticModel', ->  
   it 'should save properly', ->  
@@ -78,8 +81,24 @@ describe 'has relationship function,', ->
 
 
   describe 'with fetch relationship', ->
-    it 'should add the relationship'
-    it 'should initialize the object relationship'
+    it 'should add the relationship', ->
+      to = new TestObject()
+      to.has_relationship('bfo').should.equal true
+      to.get_relationship('bfo').should.be.an 'object'
+      to.get_relationship_model('bfo').should.equal BasicFetchObject
+      to.get_relationship_method('bfo').should.equal 'fetch'
+
+
+    it 'should initialize the object relationship', (done) ->
+      to = new TestObject({name: 'test', bfo: {name: 'bfo_test'}},{parse: true})
+      $.when(to.get('name'), to.get('bfo')).done( (name, bfo) ->
+        name.should.equal 'test'
+        bfo.should.be.an 'object'
+        bfo.should.be.instanceOf BasicFetchObject
+        bfo.get('name').should.equal 'bfo_test'
+        done()
+      )
+
     it 'should not fetch on parse'
     it 'should fetch on get'
     it 'should parse the returned value'

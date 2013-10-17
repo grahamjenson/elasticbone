@@ -35,10 +35,15 @@ class Elasticbone.ElasticModel extends Backbone.Model
     @prototype._has ||= {}
     @prototype._has[name] = options
 
-  has_relationship: (attr, options = {method: 'parse'}) ->
-    @_has and @_has[attr] and options.method == @_has[attr].method
+  has_relationship: (attr, options) ->
+    @get_relationship(attr, options) and true
 
-  get_relationship: (attr) ->
+  get_relationship: (attr, options = {}) ->
+    has_rel = @_has  and @_has[attr] and true
+    if options.method
+      has_rel = has_rel and options.method == @_has[attr].method
+    if not has_rel
+      return undefined
     @_has[attr]
 
   get_relationship_model: (attr) ->
@@ -58,8 +63,8 @@ class Elasticbone.ElasticModel extends Backbone.Model
       return []
     rels = []
     for key, val of @_has
-      if  val.method == options.method
-        rels.push(val)
+      if  (rel = @get_relationship(key, options))
+        rels.push(rel)
     rels
 
   #Semantic change, get reutrns a promise for the data
@@ -70,7 +75,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
       return $.when(data)
     if @has_relationship(attr, method: 'fetch')
       m = new @get_relationship_model(attr)()
-      m.set(get_relationship_reverse(attr), @) if has_relationship_reverse(attr)
+      m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
       @set(attr, m)
       return m.fetch(options)
     $.when(undefined)
@@ -99,7 +104,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
     else
       parsed = _.extend(parsed, data)
 
-    for val in @get_relationships(method: 'parse')
+    for val in @get_relationships()
         if parsed[val.name]
           parsed[val.name] = new val.model(parsed[val.name], parse: true)
 
