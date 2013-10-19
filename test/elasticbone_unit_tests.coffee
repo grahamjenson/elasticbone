@@ -99,6 +99,10 @@ describe 'has relationship function,', ->
         done()
       )
 
+    it 'should not be included in toJSON', ->
+      to = new TestObject({name: 'test', bfo: {name: 'bfo_test'}},{parse: true})
+      to.toJSON().should.eql {name: 'test'}
+
     it 'should not fetch on parse'
     it 'should fetch on get'
     it 'should parse the returned value'

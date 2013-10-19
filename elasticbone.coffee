@@ -11,6 +11,11 @@ Elasticbone.Backbone = Backbone
 Elasticbone.$ = $
 Elasticbone._ = _
 
+$.wait = (time) ->
+  return $.Deferred((dfd) ->
+    setTimeout(dfd.resolve, time);
+  )
+
 #This auto adds the relational thing
 
 #example of search http://localhost:9225/geojson_feature_collection/_search?pretty=true&q=%22nz-region%22&df=_geojson_dataset
@@ -113,10 +118,18 @@ class Elasticbone.ElasticModel extends Backbone.Model
   #(Backbone model) -> (elasticsearch document) 
   toJSON: (options) ->
     json = super
+    #remove id as in elastic it is outside the object
     delete json.id
-    deffereds = []
+
+    #delete all relationships
+    for rel in @get_relationships()
+      delete json[rel.name]
+
     for rel in @get_relationships(method: 'parse')
-      deffereds.push @get(rel.name).done( (x) -> json[rel.name] = x.toJSON(options)) 
+      #ASSUMPTION: ALL PARSE RELATIONSHIPS WILL BE RESOLVED GET
+      @get(rel.name).done( (x) ->
+        json[rel.name] = x.toJSON(options) if x
+      )
     json
 
 class Elasticbone.ElasticCollection extends Backbone.Collection
