@@ -125,16 +125,14 @@ describe 'has relationship function,', ->
         done()
       )
 
-    it 'should fetch on get', ->
+    it 'should fetch on get', (done) ->
       sinon.stub($, 'ajax', (req) -> 
         req.url.should.equal 'http://localhost:9225/elastic_bone_tests/BasicFetchObject'
         req.success({_id : 'new_id', _source: { name: 'bfo_test' } }, {}, {})
-        return $.when('asd')
       )
 
       to = new TestObject({name: 'test'},{parse: true})
       $.when(to.get('bfo')).then( (bfo) ->
-        console.log bfo
         bfo.id.should.equal 'new_id'
         return bfo.get('name')
       )

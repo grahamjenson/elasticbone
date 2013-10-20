@@ -86,7 +86,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
       m = new model_class()
       m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
       @set(attr, m)
-      return m.fetch(options)
+      return $.when(m.fetch(options)).then( (x) -> return m)
     $.when(undefined)
 
   #(elasticsearch document) -> (Backbone model)
