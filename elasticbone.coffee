@@ -80,6 +80,8 @@ class Elasticbone.ElasticModel extends Backbone.Model
       return $.when(data)
     
     if @has_relationship(attr, method: 'fetch')
+      #IF it is a single object, it will be a search for the item
+      #TODO have fetch query called on the single item
       model_class = @get_relationship_model(attr)
       m = new model_class()
       m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
