@@ -13,7 +13,9 @@ es =
   server: 'http://localhost:9225'
   index: 'elastic_bone_tests'
 
-class BasicFetchObject extends Backbone.Model
+class BasicFetchObject extends Elasticbone.ElasticModel
+  server: es.server
+  index: es.index
   fetch_query: 'QUERYs'
 
 class BasicObject extends Backbone.Model
@@ -91,11 +93,15 @@ describe 'has relationship function,', ->
 
     it 'should initialize the object relationship', (done) ->
       to = new TestObject({name: 'test', bfo: {name: 'bfo_test'}},{parse: true})
-      $.when(to.get('name'), to.get('bfo')).done( (name, bfo) ->
+      $.when(to.get('name'), to.get('bfo'))
+      .then((name, bfo) ->
         name.should.equal 'test'
         bfo.should.be.an 'object'
         bfo.should.be.instanceOf BasicFetchObject
-        bfo.get('name').should.equal 'bfo_test'
+        return bfo.get('name')
+      )
+      .done( (bfo_name) ->
+        bfo_name.should.equal 'bfo_test'
         done()
       )
 
@@ -103,8 +109,42 @@ describe 'has relationship function,', ->
       to = new TestObject({name: 'test', bfo: {name: 'bfo_test'}},{parse: true})
       to.toJSON().should.eql {name: 'test'}
 
-    it 'should not fetch on parse'
-    it 'should fetch on get'
+    it 'should not save the sub relationship', (done) ->
+      #as it is another documnet
+      to_json = {name: 'test', bfo: {name: 'bfo_test'}}
+      sinon.stub($, 'ajax', (req) -> 
+        req.data.should.equal JSON.stringify({name: 'test'})
+        req.success({ok: true, _id : 'new_id'}, {}, {})
+      )
+
+      to = new TestObject(to_json,{parse: true})
+      $.when(to.save()).done( (bo) ->
+        to.id.should.equal 'new_id'
+        sinon.assert.calledOnce($.ajax);
+        $.ajax.restore()
+        done()
+      )
+
+    it 'should fetch on get', ->
+      sinon.stub($, 'ajax', (req) -> 
+        req.url.should.equal 'http://localhost:9225/elastic_bone_tests/BasicFetchObject'
+        req.success({_id : 'new_id', _source: { name: 'bfo_test' } }, {}, {})
+        return $.when('asd')
+      )
+
+      to = new TestObject({name: 'test'},{parse: true})
+      $.when(to.get('bfo')).then( (bfo) ->
+        console.log bfo
+        bfo.id.should.equal 'new_id'
+        return bfo.get('name')
+      )
+      .done( (name) ->
+        name.should.equal 'bfo_test'
+        sinon.assert.calledOnce($.ajax);
+        $.ajax.restore()
+        done()
+      )
+
     it 'should parse the returned value'
     it 'toJSON should not include the model to be fetched'
     it 'should save each fetch related model async'

@@ -78,8 +78,10 @@ class Elasticbone.ElasticModel extends Backbone.Model
     #if it is there return it as a promise
     if data 
       return $.when(data)
+    
     if @has_relationship(attr, method: 'fetch')
-      m = new @get_relationship_model(attr)()
+      model_class = @get_relationship_model(attr)
+      m = new model_class()
       m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
       @set(attr, m)
       return m.fetch(options)
