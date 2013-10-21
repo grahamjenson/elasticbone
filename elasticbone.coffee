@@ -175,43 +175,39 @@ class Elasticbone.GeoQuery
 
   #takes a geoshape instance, an ElasticCollection and a field, and finds all of the collections models.field that intersect the geoshape and returns them
   #initially, will only support query with geoshape, later can support query of an already indexed shape
-  find_intersecting: (geoshape, esm, field) ->
-    console.log "TODO"
+  find_intersecting: (geoshape, elasticbone_collection, field) ->
+    ebc = new elasticbone_collection()
+    indexed = false
+    if indexed
+      geo_shape_query = 
+        "query": 
+          "filtered":
+            "query":
+              "match_all": {}
+            "filter":
+              "geo_shape": 
+                field:
+                  "indexed_shape": 
+                    "shape_field_name": geoshape.field_name,
+                    "id": geoshape.parent.id,
+                    "type": geoshape.parent.type,
+                    "index": geoshape.parent.index
+    else
+      geo_shape_query =
+        "query": 
+          "filtered":
+            "query":
+              "match_all": {}
+            "filter":
+              "geo_shape": 
+                field: 
+                  "shape": 
+                    geoshape.toJSON()
 
-class Elasticbone.GeoShape extends Elasticbone.ElasticModel
-  query_inside: (server, index, type, es) ->
-    ne = new Elasticbone.ElasticsearchObjects()
-    console.log @
-    ne.elastic(@parent._es)
+    return $.when( ebc.fetch( data:  JSON.stringify(geo_shape_query) ) )
 
-    ne.fetch_query = 
-      "query": 
-        "filtered":
-          "query":
-            "field": {"_geojson_dataset":"\"nz-area-units\""}
-          "filter":
-            "geo_shape": 
-              "geometry": 
-                "indexed_shape": 
-                  "shape_field_name": @._es.attribute,
-                  "id": @._es.parent.id,
-                  "type": @._es.type,
-                  "index": @._es.index
 
-    console.log ne.url()
-    console.log es.get('properties')
-    ne.fetch(
-      success: (collection, response, options) ->
-        console.log 'success'
-        # console.log reg.models.length
-        console.log 'model', ne.total,  ne.took
-        for model in ne.models
-          console.log 'model', ne.total,  ne.took, model.get('properties')
-      error: (collection, response, options) -> 
-        console.log 'error', response
-        #console.log 'error x', collection, response, options
-    )
-    
+class Elasticbone.GeoShape
 
 #AMD
 if (typeof define != 'undefined' && define.amd)

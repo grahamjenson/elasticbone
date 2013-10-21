@@ -18,16 +18,17 @@ es =
 class Photo extends Elasticbone.ElasticModel
   server: es.server
   index: es.index
+  @has 'location', Elasticbone.GeoShape
 
 class Photos extends Elasticbone.ElasticCollection
   model: Photo
-  @has 'location', GeoShape
+  
 
 class GeoRegion extends Elasticbone.ElasticModel
   server: es.server
   index: es.index
   type: 'geo_region'
-  @has 'geo_shape', GeoShape
+  @has 'geo_shape', Elasticbone.GeoShape
 
 class GeoRegions extends Elasticbone.ElasticCollection
   model: GeoRegion
