@@ -86,7 +86,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
       m = new model_class()
       m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
       @set(attr, m)
-      return $.when(m.fetch(options)).then( (x) -> return m)
+      return $.when(m.fetch(options)).then( (res) -> return m)
     $.when(undefined)
 
   #(elasticsearch document) -> (Backbone model)
@@ -169,14 +169,16 @@ class Elasticbone.ElasticCollection extends Backbone.Collection
     
 
 
-class Elasticbone.ElasticsearchType extends Backbone.Model
+###############Geo Helper Methods
 
+class Elasticbone.GeoQuery
 
+  #takes a geoshape instance, an ElasticCollection and a field, and finds all of the collections models.field that intersect the geoshape and returns them
+  #initially, will only support query with geoshape, later can support query of an already indexed shape
+  find_intersecting: (geoshape, esm, field) ->
+    console.log "TODO"
 
-
-###############EXTRA Helper Models
-
-class Elasticbone.GeoShape extends Elasticbone.ElasticsearchType
+class Elasticbone.GeoShape extends Elasticbone.ElasticModel
   query_inside: (server, index, type, es) ->
     ne = new Elasticbone.ElasticsearchObjects()
     console.log @

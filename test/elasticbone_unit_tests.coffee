@@ -16,7 +16,6 @@ es =
 class BasicFetchObject extends Elasticbone.ElasticModel
   server: es.server
   index: es.index
-  fetch_query: 'QUERYs'
 
 class BasicObject extends Backbone.Model
 
@@ -25,6 +24,11 @@ class TestObject extends Elasticbone.ElasticModel
   index: es.index
   @has 'bo', BasicObject
   @has 'bfo', BasicFetchObject, method: 'fetch'
+
+class TestCollection extends Elasticbone.ElasticCollection
+  server: es.server
+  index: es.index
+  model: TestObject
 
 describe 'Initialization of ElasticModel', ->  
   it 'should save properly', ->  
@@ -52,6 +56,10 @@ describe 'has relationship function,', ->
         bo.get('name').should.equal 'bo_test'
         done()
       )
+      .fail( -> 
+        sinon.assert.fail()
+        done()
+      )
   
     it 'should serialize toJSON including the internal models', ->
       to_json = {name: 'test', bo: {name: 'bo_test'}}
@@ -63,6 +71,10 @@ describe 'has relationship function,', ->
       $.when(to.get('name'), to.get('bo')).done( (name, bo) ->
         name.should.equal 'test'
         expect(bo).to.be.undefined
+        done()
+      )
+      .fail( -> 
+        sinon.assert.fail()
         done()
       )
 
@@ -80,7 +92,10 @@ describe 'has relationship function,', ->
         $.ajax.restore()
         done()
       )
-
+      .fail( -> 
+        sinon.assert.fail()
+        done()
+      )
 
   describe 'with fetch relationship', ->
     it 'should add the relationship', ->
@@ -104,6 +119,10 @@ describe 'has relationship function,', ->
         bfo_name.should.equal 'bfo_test'
         done()
       )
+      .fail( -> 
+        sinon.assert.fail()
+        done()
+      )
 
     it 'should not be included in toJSON', ->
       to = new TestObject({name: 'test', bfo: {name: 'bfo_test'}},{parse: true})
@@ -124,6 +143,10 @@ describe 'has relationship function,', ->
         $.ajax.restore()
         done()
       )
+      .fail( -> 
+        sinon.assert.fail()
+        done()
+      )
 
     it 'should fetch on get', (done) ->
       sinon.stub($, 'ajax', (req) -> 
@@ -142,7 +165,7 @@ describe 'has relationship function,', ->
         $.ajax.restore()
         done()
       )
-
-    it 'should parse the returned value'
-    it 'toJSON should not include the model to be fetched'
-    it 'should save each fetch related model async'
+      .fail( -> 
+        sinon.assert.fail()
+        done()
+      )
