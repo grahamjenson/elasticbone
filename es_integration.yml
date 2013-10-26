@@ -1,0 +1,5 @@
+cluster.name: node_mapping_dev
+path.data: ./dev_data
+path.work: ./tmp
+path.logs: ./logs
+http.port: 9250

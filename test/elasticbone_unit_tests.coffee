@@ -10,7 +10,7 @@ $ = Elasticbone.$
 _ = Elasticbone._
 
 es = 
-  server: 'http://localhost:9225'
+  server: 'http://localhost:9250'
   index: 'elastic_bone_tests'
 
 class BasicFetchObject extends Elasticbone.ElasticModel
@@ -150,7 +150,7 @@ describe 'has relationship function,', ->
 
     it 'should fetch on get', (done) ->
       sinon.stub($, 'ajax', (req) -> 
-        req.url.should.equal 'http://localhost:9225/elastic_bone_tests/BasicFetchObject'
+        req.url.should.equal 'http://localhost:9250/elastic_bone_tests/BasicFetchObject'
         req.success({_id : 'new_id', _source: { name: 'bfo_test' } }, {}, {})
       )
 

@@ -72,6 +72,11 @@ class Elasticbone.ElasticModel extends Backbone.Model
         rels.push(rel)
     rels
 
+  set_model_values: (m, attr) ->
+    m.set(@get_relationship_reverse(attr), @)
+    m._parent = @
+    m._field_name = attr
+
   #Semantic change, get reutrns a promise for the data
   get: (attr, options) ->
     data = super(attr,options)
@@ -84,7 +89,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
       #TODO have fetch query called on the single item
       model_class = @get_relationship_model(attr)
       m = new model_class()
-      m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
+      @set_model_values(m, attr)
       @set(attr, m)
       return $.when(m.fetch(options)).then( (res) -> return m)
     $.when(undefined)
@@ -115,7 +120,9 @@ class Elasticbone.ElasticModel extends Backbone.Model
 
     for val in @get_relationships()
         if parsed[val.name]
-          parsed[val.name] = new val.model(parsed[val.name], parse: true)
+          m = new val.model(parsed[val.name], parse: true)
+          @set_model_values(m, val.name)
+          parsed[val.name] = m
 
     parsed
 
@@ -168,17 +175,16 @@ class Elasticbone.ElasticCollection extends Backbone.Collection
     @[attr] = model
     
 
-
 ###############Geo Helper Methods
 
 class Elasticbone.GeoQuery
 
   #takes a geoshape instance, an ElasticCollection and a field, and finds all of the collections models.field that intersect the geoshape and returns them
   #initially, will only support query with geoshape, later can support query of an already indexed shape
-  find_intersecting: (geoshape, elasticbone_collection, field) ->
+  @find_intersecting: (geoshape, elasticbone_collection, field) ->
     ebc = new elasticbone_collection()
-    indexed = false
-    if indexed
+    
+    if !!(geoshape._field_name && geoshape._parent.id && geoshape._parent.type && geoshape._parent.index)
       geo_shape_query = 
         "query": 
           "filtered":
@@ -188,10 +194,10 @@ class Elasticbone.GeoQuery
               "geo_shape": 
                 field:
                   "indexed_shape": 
-                    "shape_field_name": geoshape.field_name,
-                    "id": geoshape.parent.id,
-                    "type": geoshape.parent.type,
-                    "index": geoshape.parent.index
+                    "shape_field_name": geoshape._field_name,
+                    "id": geoshape._parent.id,
+                    "type": geoshape._parent.type,
+                    "index": geoshape._parent.index
     else
       geo_shape_query =
         "query": 
