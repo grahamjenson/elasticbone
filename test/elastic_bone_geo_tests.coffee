@@ -45,15 +45,26 @@ class GeoRegions extends Elasticbone.ElasticCollection
 #.done((posts) -> console.log "Posts from same region", posts)
 
 
-# describe 'GeoShapeQuery', ->
+describe 'GeoQuery', ->
 
-#   describe 'a non_indexed_geoshape', ->
-#     it 'find_intersecting should query elasticsearch', ->
-#       # Geo
-#       # Elasticbone.GeoQuery.find_intersecting(geoshape, elasticbone_collection, field)
-      
-#   describe 'indexed geo_shape', ->
-#     it 'find_intersecting should query elasticsearch', ->
+  describe 'query_from_cached', ->
+    GeoQuery.query_from_cached("query_field", "shape_field_name", "id", "type", "index")
+
+  describe 'query_from_geojson', ->
+    GeoQuery.query_from_geojson("query_field", "geojson")
+
+  describe 'find_intersecting', ->
+
+    describe 'a non_indexed_geoshape', ->
+      it 'find_intersecting should query elasticsearch', ->
+        gr = new GeoRegion({name: 'wel', geo_shape: {}}, {parse: true})
+        $.when(gr.get('geo_shape')).done((gs) ->
+          GeoQuery.find_intersecting(gs, GeoRegions, 'geo_shape')
+        )
+        
+        
+    describe 'indexed geo_shape', ->
+      it 'find_intersecting should query elasticsearch', ->
 
 #The ideal Situation
 #p = new Photo(location: {lat: 10, lon : 20})

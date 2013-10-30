@@ -60,7 +60,19 @@ describe 'has relationship function,', ->
         sinon.assert.fail()
         done()
       )
-  
+
+    it 'should initialize the reverse relationships', (done) ->
+      to = new TestObject({name: 'test', bo: {name: 'bo_test'}}, {parse: true})
+      $.when(to.get('name'), to.get('bo')).done( (name, bo) ->
+        bo._parent.should.equal to
+        bo._field_name.should.equal 'bo'
+        done()
+      )
+      .fail( -> 
+        sinon.assert.fail()
+        done()
+      )
+
     it 'should serialize toJSON including the internal models', ->
       to_json = {name: 'test', bo: {name: 'bo_test'}}
       to = new TestObject( to_json , {parse: true} )

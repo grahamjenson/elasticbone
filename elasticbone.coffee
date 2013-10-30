@@ -73,7 +73,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
     rels
 
   set_model_values: (m, attr) ->
-    m.set(@get_relationship_reverse(attr), @)
+    m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
     m._parent = @
     m._field_name = attr
 
@@ -185,35 +185,38 @@ class Elasticbone.GeoQuery
     ebc = new elasticbone_collection()
     
     if !!(geoshape._field_name && geoshape._parent.id && geoshape._parent.type && geoshape._parent.index)
-      geo_shape_query = 
-        "query": 
-          "filtered":
-            "query":
-              "match_all": {}
-            "filter":
-              "geo_shape": 
-                field:
-                  "indexed_shape": 
-                    "shape_field_name": geoshape._field_name,
-                    "id": geoshape._parent.id,
-                    "type": geoshape._parent.type,
-                    "index": geoshape._parent.index
+      geo_shape_query = @query_from_cached(field, geoshape._field_name, geoshape._parent.id, geoshape._parent.type, geoshape._parent.index)
     else
-      geo_shape_query =
-        "query": 
-          "filtered":
-            "query":
-              "match_all": {}
-            "filter":
-              "geo_shape": 
-                field: 
-                  "shape": 
-                    geoshape.toJSON()
+      geo_shape_query = @query_from_geojson(field, geoshape.toJSON())
+    return $.when(ebc.fetch( data:  JSON.stringify(geo_shape_query) ) )
 
-    return $.when( ebc.fetch( data:  JSON.stringify(geo_shape_query) ) )
+  @query_from_cached: (query_field, shape_field_name, id, type, index) ->
+    "query": 
+      "filtered":
+        "query":
+          "match_all": {}
+        "filter":
+          "geo_shape": 
+            query_field:
+              "indexed_shape": 
+                "shape_field_name": shape_field_name,
+                "id": id,
+                "type": type,
+                "index": index
+
+  @query_from_geojson: (query_field, geojson) ->
+    "query": 
+      "filtered":
+        "query":
+          "match_all": {}
+        "filter":
+          "geo_shape": 
+            query_field: 
+              "shape": 
+                geojson
 
 
-class Elasticbone.GeoShape
+class Elasticbone.GeoShape extends Backbone.Model
 
 #AMD
 if (typeof define != 'undefined' && define.amd)
