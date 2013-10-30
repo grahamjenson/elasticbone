@@ -181,3 +181,4 @@ describe 'has relationship function,', ->
         sinon.assert.fail()
         done()
       )
+      

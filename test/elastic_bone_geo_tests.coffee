@@ -56,11 +56,27 @@ describe 'GeoQuery', ->
   describe 'find_intersecting', ->
 
     describe 'a non_indexed_geoshape', ->
-      it 'find_intersecting should query elasticsearch', ->
+      it 'find_intersecting should query elasticsearch', (done) ->
+        json = {hits: {hits: [{name: 'ack', geo_shape: {} }] }}
+        sinon.stub($, 'ajax', (req) -> 
+          req.success(json, {}, {})
+        )
+
         gr = new GeoRegion({name: 'wel', geo_shape: {}}, {parse: true})
         $.when(gr.get('geo_shape')).done((gs) ->
           GeoQuery.find_intersecting(gs, GeoRegions, 'geo_shape')
         )
+        .done((regions) ->
+          regions.should.be.an 'object'
+          regions.should.be.instanceOf BasicFetchObject
+          regions.size.should equal 1
+          $.ajax.restore()
+        )      
+        .fail( -> 
+          sinon.assert.fail()
+          done()
+        )
+        .always( -> $.ajax.restore())
         
         
     describe 'indexed geo_shape', ->
