@@ -104,7 +104,7 @@ class Elasticbone.ElasticModel extends Backbone.Model
     if data._id
       parsed.id = data._id
     if data.id
-      parsed.id = id
+      parsed.id = data.id
     #Possible Data
     # 1) on a save to elasticsearch the responce will work
     #model is created without ids but needs to be parsed
@@ -159,13 +159,11 @@ class Elasticbone.ElasticCollection extends Backbone.Collection
   server: 'http://localhost:9200'
 
   parse: (data) ->
-    console.log 'parse col', data
     @total = data.hits.total
     @took = data.took
     return data.hits.hits
 
   fetch: (options) ->
-    console.log 'fetch col', options, @fetch_query()
     super _.defaults(options, {
       type: 'POST'
       data:  JSON.stringify(@fetch_query())

@@ -48,10 +48,12 @@ class GeoRegions extends Elasticbone.ElasticCollection
 describe 'GeoQuery', ->
 
   describe 'query_from_cached', ->
-    GeoQuery.query_from_cached("query_field", "shape_field_name", "id", "type", "index")
+    it 'should not break', ->
+      GeoQuery.query_from_cached("query_field", "shape_field_name", "id", "type", "index")
 
   describe 'query_from_geojson', ->
-    GeoQuery.query_from_geojson("query_field", "geojson")
+    it 'should not break', ->
+      GeoQuery.query_from_geojson("query_field", "geojson")
 
   describe 'find_intersecting', ->
 
@@ -63,16 +65,25 @@ describe 'GeoQuery', ->
           req.success(json, {}, {})
         )
 
+        query_spy = sinon.spy(GeoQuery, 'query_from_geojson')
+
         gr = new GeoRegion({name: 'wel', geo_shape: {}}, {parse: true})
+
         $.when(gr.get('geo_shape'))
         .then((gs) ->
           return GeoQuery.find_intersecting(gs, GeoRegions, 'geo_shape')
         )
-        .done((regions) ->
+        .then((regions) ->
           regions.should.be.an 'object'
           regions.should.be.instanceOf GeoRegions
           regions.size().should.equal 1
-        )      
+          regions.models[0].should.be.instanceOf GeoRegion
+          return regions.models[0].get('name')
+        )
+        .done((name) ->
+          name.should.equal 'ack'
+          sinon.assert.calledOnce(query_spy)
+        )    
         .fail( -> 
           sinon.assert.fail()
         )
@@ -83,7 +94,39 @@ describe 'GeoQuery', ->
         
         
     describe 'indexed geo_shape', ->
-      it 'find_intersecting should query elasticsearch', ->
+      it 'find_intersecting should query elasticsearch', (done) ->
+        json = {hits: {hits: [{name: 'ack', geo_shape: {} }] }}
+        
+        sinon.stub($, 'ajax', (req) -> 
+          req.success(json, {}, {})
+        )
+
+        query_spy = sinon.spy(GeoQuery, 'query_from_cached')
+
+        gr = new GeoRegion({id: 10, name: 'wel', geo_shape: {}}, {parse: true})
+
+        $.when(gr.get('geo_shape'))
+        .then((gs) ->
+          return GeoQuery.find_intersecting(gs, GeoRegions, 'geo_shape')
+        )
+        .then((regions) ->
+          regions.should.be.an 'object'
+          regions.should.be.instanceOf GeoRegions
+          regions.size().should.equal 1
+          regions.models[0].should.be.instanceOf GeoRegion
+          return regions.models[0].get('name')
+        )
+        .done((name) ->
+          name.should.equal 'ack'
+          sinon.assert.calledOnce(query_spy)
+        )    
+        .fail( -> 
+          sinon.assert.fail()
+        )
+        .always( -> 
+          $.ajax.restore()
+          done()
+        )
 
 #The ideal Situation
 #p = new Photo(location: {lat: 10, lon : 20})
