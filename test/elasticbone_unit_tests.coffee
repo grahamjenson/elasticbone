@@ -35,7 +35,7 @@ describe 'Initialization of ElasticModel', ->
     to = new TestObject()
     to.server.should.equal es.server
     to.index.should.equal es.index
-    to.type.should.equal "TestObject"
+    to.type.should.equal "test_object"
 
 describe 'has relationship function,', ->
   describe 'with parse relationship', ->

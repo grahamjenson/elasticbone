@@ -30,21 +30,20 @@ class Posts extends Elasticbone.ElasticCollection
 
 Elasticmodels and elasticcollections reference an elasticsearch server, index and type.
 
+The default type is the snakecase of the (presumably camelcase) name of the model, in the case of a collection it is the snakecase of its defined model. It can be overwritten by setting a ```type```.
+
 ```
 class User extends Elasticbone.ElasticModel
   server: 'localhost:9000' 
   index: 'blog'
-  type: 'user'
 
 class Post extends Elasticbone.ElasticModel
   server: 'localhost:9000' 
   index: 'blog'
-  type: 'post'
 
 class Posts extends Elasticbone.ElasticCollection
   server: 'localhost:9000' 
   index: 'blog'
-  type: 'post'
 ```
 
 ###Relationships
