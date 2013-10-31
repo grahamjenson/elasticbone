@@ -54,10 +54,11 @@ describe 'has relationship function,', ->
         bo.should.be.an 'object'
         bo.should.be.instanceOf BasicObject
         bo.get('name').should.equal 'bo_test'
-        done()
       )
       .fail( -> 
         sinon.assert.fail()
+      )
+      .always( -> 
         done()
       )
 
@@ -66,10 +67,11 @@ describe 'has relationship function,', ->
       $.when(to.get('name'), to.get('bo')).done( (name, bo) ->
         bo._parent.should.equal to
         bo._field_name.should.equal 'bo'
-        done()
       )
       .fail( -> 
         sinon.assert.fail()
+      )
+      .always( -> 
         done()
       )
 
@@ -83,10 +85,11 @@ describe 'has relationship function,', ->
       $.when(to.get('name'), to.get('bo')).done( (name, bo) ->
         name.should.equal 'test'
         expect(bo).to.be.undefined
-        done()
       )
       .fail( -> 
         sinon.assert.fail()
+      )
+      .always( -> 
         done()
       )
 
@@ -101,11 +104,12 @@ describe 'has relationship function,', ->
       $.when(to.save()).done( (bo) ->
         to.id.should.equal 'new_id'
         sinon.assert.calledOnce($.ajax);
-        $.ajax.restore()
-        done()
       )
       .fail( -> 
         sinon.assert.fail()
+      )
+      .always( -> 
+        $.ajax.restore()
         done()
       )
 
@@ -129,12 +133,14 @@ describe 'has relationship function,', ->
       )
       .done( (bfo_name) ->
         bfo_name.should.equal 'bfo_test'
-        done()
       )
       .fail( -> 
         sinon.assert.fail()
+      )
+      .always( -> 
         done()
       )
+
 
     it 'should not be included in toJSON', ->
       to = new TestObject({name: 'test', bfo: {name: 'bfo_test'}},{parse: true})
@@ -152,11 +158,12 @@ describe 'has relationship function,', ->
       $.when(to.save()).done( (bo) ->
         to.id.should.equal 'new_id'
         sinon.assert.calledOnce($.ajax);
-        $.ajax.restore()
-        done()
       )
       .fail( -> 
         sinon.assert.fail()
+      )
+      .always( -> 
+        $.ajax.restore()
         done()
       )
 
@@ -174,11 +181,12 @@ describe 'has relationship function,', ->
       .done( (name) ->
         name.should.equal 'bfo_test'
         sinon.assert.calledOnce($.ajax);
-        $.ajax.restore()
-        done()
       )
       .fail( -> 
         sinon.assert.fail()
+      )
+      .always( -> 
+        $.ajax.restore()
         done()
       )
       

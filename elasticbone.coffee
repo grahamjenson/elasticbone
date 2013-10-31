@@ -183,12 +183,11 @@ class Elasticbone.GeoQuery
   #initially, will only support query with geoshape, later can support query of an already indexed shape
   @find_intersecting: (geoshape, elasticbone_collection, field) ->
     ebc = new elasticbone_collection()
-    
     if !!(geoshape._field_name && geoshape._parent.id && geoshape._parent.type && geoshape._parent.index)
       geo_shape_query = @query_from_cached(field, geoshape._field_name, geoshape._parent.id, geoshape._parent.type, geoshape._parent.index)
     else
       geo_shape_query = @query_from_geojson(field, geoshape.toJSON())
-    return $.when(ebc.fetch( data:  JSON.stringify(geo_shape_query) ) )
+    return $.when(ebc.fetch( data:  JSON.stringify(geo_shape_query))).then( (res) -> return ebc) 
 
   @query_from_cached: (query_field, shape_field_name, id, type, index) ->
     "query": 
