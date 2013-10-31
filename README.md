@@ -30,7 +30,7 @@ class Posts extends Elasticbone.ElasticCollection
 
 Elasticmodels and elasticcollections reference an elasticsearch server, index and type.
 
-The default type is the snakecase of the (presumably camelcase) name of the model, in the case of a collection it is the snakecase of its defined model. It can be overwritten by setting a ```type```.
+The default type is the name of the model, in the case of a collection there is no default type.
 
 ```
 class User extends Elasticbone.ElasticModel
@@ -44,12 +44,14 @@ class Post extends Elasticbone.ElasticModel
 class Posts extends Elasticbone.ElasticCollection
   server: 'localhost:9000' 
   index: 'blog'
+  type: 'Post'
+  model: Post
 ```
 
 ###Relationships
 Elasticbone also lets you define relationships between backbone models and elasticsearch documents.
 
-To relate models together the ```has``` function is used, and options are passed to it.
+To relate models together the ```has``` function (*inspired by rails*) is used, and options are passed to it.
 The basic structure is ```has 'attribute', Model, {options}```
 
 By default the relationship will be treated as a subdocument, e.g.
@@ -121,10 +123,43 @@ User.has 'posts', Posts
 
 ```
 
+#GeoRegion & GeoJSON
+
+A supported feature of elasticsearch is its GeoJSON querying with ``` GeoQuery.find_intersecting ```
+
+```
+class Photo extends Elasticbone.ElasticModel
+  ...
+  @has 'location', Elasticbone.GeoShape
+
+class Photos extends Elasticbone.ElasticCollection
+  model: Photo
+
+class GeoRegion extends Elasticbone.ElasticModel
+  ...
+  @has 'geo_shape', Elasticbone.GeoShape
+
+class GeoRegions extends Elasticbone.ElasticCollection
+  model: GeoRegion
+```
+
+Something like this will (should) work
+
+```
+#Box around new zealand
+gr = new GeoRegion({'geo_shape' : { "type": "Polygon", "coordinates": [ [ [ 166.0, -47.6 ], [166.0, -34.3 ], [179.1, -34.3], [179.1, -47.6] ] ] } }, {parse: true})
+
+#Search for all Photos in New Zealand
+$.when(gr.get('geo_shape'))
+.then((gs) -> GeoQuery.find_intersecting(gs, Photos, 'location'))
+.done((photos) -> console.log "Photos from New Zealand", photos)
+```
+
 ##Development
 
 Installation: npm inst
 Testing: npm test
+
 Contribution: Welcome
 
 ##Production release
